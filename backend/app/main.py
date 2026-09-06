@@ -43,6 +43,14 @@ def create_application() -> FastAPI:
             allow_headers=["*"],
         )
 
+    # Security Headers Middleware
+    from app.middleware.security_headers import SecurityHeadersMiddleware
+    application.add_middleware(SecurityHeadersMiddleware)
+
+    # Rate Limiter Middleware
+    from app.middleware.rate_limiter import RateLimiterMiddleware
+    application.add_middleware(RateLimiterMiddleware, max_requests=150, window_seconds=60)
+
     # Register standardized error handlers
     register_exception_handlers(application)
 
