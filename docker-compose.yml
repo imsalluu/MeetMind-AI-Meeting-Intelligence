@@ -1,0 +1,95 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: meetmind_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-meetmind}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-meetmind_password}
+      POSTGRES_DB: ${POSTGRES_DB:-meetmind_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-meetmind} -d ${POSTGRES_DB:-meetmind_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: meetmind_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: meetmind_backend
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-meetmind}:${POSTGRES_PASSWORD:-meetmind_password}@postgres:5432/${POSTGRES_DB:-meetmind_db}
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - JWT_SECRET=${JWT_SECRET:-super_secret_jwt_signing_key_change_in_production_min_32_chars}
+      - STORAGE_TYPE=local
+      - UPLOAD_DIR=/app/storage/uploads
+    ports:
+      - "8000:8000"
+    volumes:
+      - storage_data:/app/storage/uploads
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.worker
+    container_name: meetmind_worker
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-meetmind}:${POSTGRES_PASSWORD:-meetmind_password}@postgres:5432/${POSTGRES_DB:-meetmind_db}
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - STORAGE_TYPE=local
+      - UPLOAD_DIR=/app/storage/uploads
+    volumes:
+      - storage_data:/app/storage/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: meetmind_frontend
+    restart: always
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:
+  redis_data:
+  storage_data:
