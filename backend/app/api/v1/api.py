@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.routes import auth, health, insights, meetings, transcription
+from app.api.routes import auth, chat, health, insights, meetings, transcription
 
 api_router = APIRouter()
 
@@ -9,3 +9,4 @@ api_router.include_router(auth.router)
 api_router.include_router(meetings.router)
 api_router.include_router(transcription.router)
 api_router.include_router(insights.router)
+api_router.include_router(chat.router)
