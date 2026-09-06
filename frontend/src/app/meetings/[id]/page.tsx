@@ -37,6 +37,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { ProcessingStatusBanner } from "@/components/meetings/ProcessingStatusBanner";
 import { AudioPlayer } from "@/components/transcript/AudioPlayer";
 import { TranscriptViewer } from "@/components/transcript/TranscriptViewer";
+import { AskMeetingChat } from "@/components/chat/AskMeetingChat";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -571,11 +572,10 @@ export default function MeetingDetailPage() {
             </div>
           )}
 
-          {/* 6. Ask Meeting (RAG) Tab will be mounted in Phase 13 */}
+          {/* 6. Ask Meeting (RAG) Tab */}
           {activeTab === "chat" && (
             <div id="ask-meeting-container">
-              {/* Dynamic import / mounting of AskMeetingChat component */}
-              <AskMeetingChatPlaceholder
+              <AskMeetingChat
                 meetingId={meeting.id}
                 onJumpToTimestamp={handleSeek}
               />
@@ -584,20 +584,5 @@ export default function MeetingDetailPage() {
         </div>
       </div>
     </AppShell>
-  );
-}
-
-// Placeholder for Phase 13 full AskMeetingChat component
-function AskMeetingChatPlaceholder({
-  meetingId,
-  onJumpToTimestamp,
-}: {
-  meetingId: string;
-  onJumpToTimestamp: (seconds: number) => void;
-}) {
-  return (
-    <div id="ask-meeting-chat-slot">
-      {/* Will be replaced with complete AskMeetingChat component in Phase 13 */}
-    </div>
   );
 }
