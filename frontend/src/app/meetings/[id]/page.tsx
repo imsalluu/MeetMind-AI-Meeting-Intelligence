@@ -218,6 +218,34 @@ export default function MeetingDetailPage() {
               </p>
             </div>
           </div>
+
+          {/* Export Action Buttons */}
+          <div className="flex items-center gap-2">
+            <a
+              href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/meetings/${meeting.id}/export/markdown`}
+              download
+            >
+              <Button size="sm" variant="outline" leftIcon={<Download className="w-3.5 h-3.5" />}>
+                Export Markdown
+              </Button>
+            </a>
+            <a
+              href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/meetings/${meeting.id}/export/json`}
+              download
+            >
+              <Button size="sm" variant="outline" leftIcon={<Download className="w-3.5 h-3.5" />}>
+                Export JSON
+              </Button>
+            </a>
+            <a
+              href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/meetings/${meeting.id}/export/txt`}
+              download
+            >
+              <Button size="sm" variant="outline" leftIcon={<FileText className="w-3.5 h-3.5" />}>
+                TXT
+              </Button>
+            </a>
+          </div>
         </div>
 
         {/* Live Processing Status Banner */}
