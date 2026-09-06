@@ -1,0 +1,35 @@
+# ==============================================================================
+# MeetMind — Background Worker Dockerfile
+# ==============================================================================
+FROM python:3.11-slim AS builder
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir --user -r requirements.txt
+
+# --- Runner Stage ---
+FROM python:3.11-slim AS runner
+
+WORKDIR /app
+
+RUN groupadd -g 1001 meetmind && \
+    useradd -u 1001 -g meetmind -m -s /bin/bash meetmind
+
+COPY --from=builder /root/.local /home/meetmind/.local
+ENV PATH=/home/meetmind/.local/bin:$PATH
+
+COPY --chown=meetmind:meetmind . .
+
+RUN mkdir -p /app/storage/uploads && chown -R meetmind:meetmind /app/storage
+
+USER meetmind
+
+ENV PYTHONUNBUFFERED=1
+
+CMD ["python", "-m", "app.services.worker.pipeline"]

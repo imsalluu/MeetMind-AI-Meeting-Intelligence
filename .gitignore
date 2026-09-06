@@ -78,4 +78,4 @@ Thumbs.db
 *.swo
 
 # Docker
-.dockerignore
+# (allow .dockerignore files)
